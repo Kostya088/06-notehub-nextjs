@@ -1,40 +1,27 @@
 import { fetchNoteById } from "@/lib/api";
-import css from "./page.module.css";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import NoteDetailsClient from "./NoteDetails.client";
 
-interface singleNoteProps {
+interface NoteDetailsProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function SingleNote({ params }: singleNoteProps) {
+export default async function NoteDetails({ params }: NoteDetailsProps) {
   const { id } = await params;
-  const note = await fetchNoteById(id);
+  const queryClient = new QueryClient();
 
-  const createdIso = note.createdAt;
-  const updatedIso = note.updatedAt;
-  const creaeted = new Date(createdIso);
-  const updated = new Date(updatedIso);
+  await queryClient.prefetchQuery({
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
+  });
 
   return (
-    <div className={css.noteContainer}>
-      <h1>{note.title}</h1>
-      <span className={css.tag}>{note.tag}</span>
-      <p>{note.content}</p>
-      <div className={css.date}>
-        <p>
-          Created at: {creaeted.getFullYear()}/
-          {String(creaeted.getMonth() + 1).padStart(2, "0")}/
-          {String(creaeted.getDate()).padStart(2, "0")}{" "}
-          {String(creaeted.getHours()).padStart(2, "0")}:
-          {String(creaeted.getMinutes()).padStart(2, "0")}
-        </p>
-        <p>
-          Last updated at: {updated.getFullYear()}/
-          {String(updated.getMonth() + 1).padStart(2, "0")}/
-          {String(updated.getDate()).padStart(2, "0")}{" "}
-          {String(updated.getHours()).padStart(2, "0")}:
-          {String(updated.getMinutes()).padStart(2, "0")}
-        </p>
-      </div>
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <NoteDetailsClient />
+    </HydrationBoundary>
   );
 }
