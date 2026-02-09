@@ -27,11 +27,12 @@ export default function NoteList({ notes }: NoteListProps) {
         <p className={css.content}>{note.content}</p>
         <div className={css.footer}>
           <span className={css.tag}>{note.tag}</span>
-          <button className={`${css.button} ${css.details}`}>
-            <Link href={`/notes/${note.id}`} className={css.noteLink}>
-              View details
-            </Link>
-          </button>
+          <Link
+            href={`/notes/${note.id}`}
+            className={`${css.button} ${css.details}`}
+          >
+            View details
+          </Link>
           <button
             className={`${css.button} ${css.delete}`}
             onClick={() => mutate(note.id)}
